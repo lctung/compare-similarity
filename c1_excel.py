@@ -59,29 +59,6 @@ def compute_ssim(image1_path, image2_path, target_size=(128, 128)):
         print(f"SSIM 計算失敗：{e}")
         return 0.0
     
-# def compute_ssim(image1_path, image2_path, target_size=(128, 128)):
-#     """ 計算 SSIM，並避免 win_size 超過圖片大小 """
-#     image1 = Image.open(image1_path).convert("RGB").resize(target_size)
-#     image2 = Image.open(image2_path).convert("RGB").resize(target_size)
-
-#     image1 = np.array(image1)
-#     image2 = np.array(image2)
-
-#     min_dim = min(image1.shape[:2])
-#     win_size = min(7, min_dim)
-    
-#     if win_size < 3:
-#         print(f"圖片太小，無法計算 SSIM：{image1_path} vs {image2_path}")
-#         return 0.0  # 或 return None
-
-#     try:
-#         ssim_value = ssim(image1, image2, channel_axis=-1, win_size=win_size)
-#     except Exception as e:
-#         print(f"SSIM 計算失敗：{e}")
-#         ssim_value = 0.0  # 預設錯誤為 0 相似度
-
-#     return ssim_value
-
 
 def compare_handwritings(folder_path, my_handwriting_paths):
     """ 比較手寫字圖片相似度，回傳 DataFrame """
