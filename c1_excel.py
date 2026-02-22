@@ -29,27 +29,60 @@ def compute_lpips_distance(image1_path, image2_path):
 
     return distance.item()
 def compute_ssim(image1_path, image2_path, target_size=(128, 128)):
-    """ 計算 SSIM，並避免 win_size 超過圖片大小 """
-    image1 = Image.open(image1_path).convert("RGB").resize(target_size)
-    image2 = Image.open(image2_path).convert("RGB").resize(target_size)
-
-    image1 = np.array(image1)
-    image2 = np.array(image2)
-
-    min_dim = min(image1.shape[:2])
-    win_size = min(7, min_dim)
-    
-    if win_size < 3:
-        print(f"圖片太小，無法計算 SSIM：{image1_path} vs {image2_path}")
-        return 0.0  # 或 return None
-
+    """ 計算 SSIM，優化字體生成專案的準確度 """
     try:
-        ssim_value = ssim(image1, image2, channel_axis=-1, win_size=win_size)
+        # 轉為灰階 'L' 以專注於字體結構，並調整大小
+        image1 = Image.open(image1_path).convert("L").resize(target_size)
+        image2 = Image.open(image2_path).convert("L").resize(target_size)
+
+        img1_arr = np.array(image1)
+        img2_arr = np.array(image2)
+
+        # 確保 win_size 為奇數且不超過圖片尺寸
+        min_dim = min(img1_arr.shape[:2])
+        win_size = min(7, min_dim)
+        if win_size % 2 == 0:  # 如果是偶數，減 1 變奇數
+            win_size -= 1
+
+        if win_size < 3:
+            print(f"圖片尺寸 ({min_dim}) 太小，無法滿足最小 win_size=3")
+            return 0.0
+
+        # 指定 data_range=255 (因為是 uint8 0-255)
+        ssim_value = ssim(img1_arr, img2_arr, 
+                          win_size=win_size, 
+                          data_range=255)
+        
+        return ssim_value
+
     except Exception as e:
         print(f"SSIM 計算失敗：{e}")
-        ssim_value = 0.0  # 預設錯誤為 0 相似度
+        return 0.0
+    
+# def compute_ssim(image1_path, image2_path, target_size=(128, 128)):
+#     """ 計算 SSIM，並避免 win_size 超過圖片大小 """
+#     image1 = Image.open(image1_path).convert("RGB").resize(target_size)
+#     image2 = Image.open(image2_path).convert("RGB").resize(target_size)
 
-    return ssim_value
+#     image1 = np.array(image1)
+#     image2 = np.array(image2)
+
+#     min_dim = min(image1.shape[:2])
+#     win_size = min(7, min_dim)
+    
+#     if win_size < 3:
+#         print(f"圖片太小，無法計算 SSIM：{image1_path} vs {image2_path}")
+#         return 0.0  # 或 return None
+
+#     try:
+#         ssim_value = ssim(image1, image2, channel_axis=-1, win_size=win_size)
+#     except Exception as e:
+#         print(f"SSIM 計算失敗：{e}")
+#         ssim_value = 0.0  # 預設錯誤為 0 相似度
+
+#     return ssim_value
+
+
 def compare_handwritings(folder_path, my_handwriting_paths):
     """ 比較手寫字圖片相似度，回傳 DataFrame """
     results = []
@@ -73,10 +106,10 @@ def compare_handwritings(folder_path, my_handwriting_paths):
     return df
 
 # 設定資料夾
-folder_path = 'D:/compare_lpips_ssim-main/word'
-my_handwriting_folder = 'D:/compare_lpips_ssim-main/yours'
+folder_path = r"D:\NTUT\AI\Font-Project\03-compare_lpips_ssim-main\9673"
+my_handwriting_folder = r"D:\NTUT\AI\Font-Project\03-compare_lpips_ssim-main\mine"
 
-# 確保 `yours` 資料夾內有圖片
+# 確保 `mine` 資料夾內有圖片
 my_handwriting_images = [
     os.path.join(my_handwriting_folder, f) for f in os.listdir(my_handwriting_folder)
     if f.lower().endswith(('png', 'jpg', 'jpeg'))
