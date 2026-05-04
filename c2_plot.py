@@ -19,11 +19,17 @@ for csv_file in csv_files:
     # 確保必要欄位存在
     required_columns = {'Student', 'LPIPS', 'SSIM'}
     if not required_columns.issubset(df.columns):
-        print(f"⚠️ 警告：{csv_file} 缺少必要欄位，跳過此檔案。")
+        print(f"警告：{csv_file} 缺少必要欄位，跳過此檔案。")
         continue  
 
     # 檢查原始數據範圍
-    print(f"📊 {csv_file} - SSIM 範圍: {df['SSIM'].min()} ~ {df['SSIM'].max()}, LPIPS 範圍: {df['LPIPS'].min()} ~ {df['LPIPS'].max()}")
+    print(f"{csv_file} - SSIM 範圍: {df['SSIM'].min()} ~ {df['SSIM'].max()}, LPIPS 範圍: {df['LPIPS'].min()} ~ {df['LPIPS'].max()}")
+
+    my_data = pd.DataFrame({'Student': ['Mine'], 'LPIPS': [0.0], 'SSIM': [1.0]})
+    df = pd.concat([df, my_data], ignore_index=True)
+
+    # 建立一個顏色分類標籤分紅綠
+    df['Color_Type'] = df['Student'].apply(lambda x: 'Self' if x == 'Mine' else 'Others')
 
     # 篩選數據
     df_filtered = df[(df['SSIM'] >= 0) & (df['SSIM'] <= 1) & 
@@ -31,19 +37,30 @@ for csv_file in csv_files:
 
     # 如果篩選後沒數據，跳過繪圖
     if df_filtered.empty:
-        print(f"⚠️ {csv_file} 無符合條件的數據，跳過繪圖。")
+        print(f"{csv_file} 無符合條件的數據，跳過繪圖。")
         continue
 
     # 設定圖片大小
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 8))
     plt.title(f'Scatter - SSIM vs LPIPS ({csv_file})', fontsize=14)
 
     # 繪製散點圖
-    scatter = sns.scatterplot(data=df_filtered, x='SSIM', y='LPIPS', hue='Student', palette='tab10', legend=False)
+    custom_palette = {'Self': 'red', 'Others': 'green'}
+    
+    scatter = sns.scatterplot(
+        data=df_filtered, 
+        x='SSIM', 
+        y='LPIPS', 
+        hue='Color_Type',
+        palette=custom_palette, 
+        s=100,
+        edgecolor='w',
+        legend=True
+    )
 
     # 加入標籤（偏移一點，避免重疊）
     for index, row in df_filtered.iterrows():
-        plt.text(row['SSIM'] + 0.002, row['LPIPS'], 
+        plt.text(row['SSIM'] + 0.005, row['LPIPS'], 
                  row['Student'], horizontalalignment='left', 
                  fontsize=9, color='black', weight='semibold')
 
@@ -59,9 +76,9 @@ for csv_file in csv_files:
     image_filename = os.path.splitext(csv_file)[0] + ".png"
     image_path = os.path.join(csv_folder, image_filename)
     plt.savefig(image_path, bbox_inches='tight', dpi=300)
-    print(f"✅ 圖片已儲存：{image_path}")
+    print(f"圖片已儲存：{image_path}")
 
     # 顯示圖片
     plt.show()
 
-print("🎉 所有 CSV 檔案的圖表已生成完畢！")
+print("所有 CSV 檔案的圖表已生成完畢！")

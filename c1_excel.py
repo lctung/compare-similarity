@@ -83,8 +83,8 @@ def compare_handwritings(folder_path, my_handwriting_paths):
     return df
 
 # 設定資料夾
-folder_path = r"D:\NTUT\AI\Font-Project\03-compare_lpips_ssim-main\9673"
-my_handwriting_folder = r"D:\NTUT\AI\Font-Project\03-compare_lpips_ssim-main\mine"
+folder_path = r"D:\NTUT\AI\Font-Project\compare-similarity\9673"
+my_handwriting_folder = r"D:\NTUT\AI\Font-Project\compare-similarity\mine"
 
 # 確保 `mine` 資料夾內有圖片
 my_handwriting_images = [
@@ -93,7 +93,7 @@ my_handwriting_images = [
 ]
 
 if not my_handwriting_images:
-    raise ValueError("錯誤：'yours' 資料夾內沒有圖片！請確認有 PNG、JPG 或 JPEG 檔案。")
+    raise ValueError("錯誤：'mine' 資料夾內沒有圖片！請確認有 PNG、JPG 或 JPEG 檔案。")
 
 # 執行比對
 df = compare_handwritings(folder_path, my_handwriting_images)
